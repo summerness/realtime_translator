@@ -219,15 +219,27 @@ class TranslatorUI(tk.Tk):
 
     def append_recognized_text(self, text):
         self.recognized_text.config(state=tk.NORMAL)
-        if text.startswith(" (Partial) "):
-            self.recognized_text.insert(tk.END, text + "\n")
+        # 获取当前文本框的所有内容
+        current_content = self.recognized_text.get("1.0", tk.END).strip()
+        if not current_content or current_content.endswith("\n"):
+            if text.startswith(" (Partial) "):
+                # 如果是新的 partial 结果，直接追加，不加换行
+                self.recognized_text.insert(tk.END, text)
+            else:
+                # 如果是新的 final 结果，直接追加，加换行
+                self.recognized_text.insert(tk.END, text + "\n")
         else:
-            current_content = self.recognized_text.get("1.0", tk.END)
             last_line_start = self.recognized_text.index("end-1c linestart")
             last_line_content = self.recognized_text.get(last_line_start, tk.END).strip()
-            if last_line_content.startswith("(Partial)"):
-                self.recognized_text.delete(last_line_start, tk.END)
-            self.recognized_text.insert(tk.END, text + "\n")
+
+            if text.startswith(" (Partial) "):
+                if last_line_content.startswith("(Partial)"):
+                    self.recognized_text.delete(last_line_start, tk.END)
+                self.recognized_text.insert(tk.END, text)
+            else:
+                if last_line_content.startswith("(Partial)"):
+                    self.recognized_text.delete(last_line_start, tk.END)
+                self.recognized_text.insert(tk.END, text + "\n")
 
         self.recognized_text.see(tk.END)
         self.recognized_text.config(state=tk.DISABLED)
