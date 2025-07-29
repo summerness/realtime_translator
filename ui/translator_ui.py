@@ -1,16 +1,18 @@
 # ui/translator_ui.py
 import tkinter as tk
-from tkinter import scrolledtext, messagebox, ttk, filedialog # 导入 filedialog
+from tkinter import scrolledtext, messagebox, ttk, filedialog  # 导入 filedialog
+
 
 class TranslatorUI(tk.Tk):
-    def __init__(self, start_callback, stop_callback, save_callback, get_audio_input_devices_callback, get_available_models_callback): # 新增 save_callback
+    def __init__(self, start_callback, stop_callback, save_callback, get_audio_input_devices_callback,
+                 get_available_models_callback):  # 新增 save_callback
         super().__init__()
         self.title("实时翻译工具")
         self.geometry("950x700")
 
         self.start_callback = start_callback
         self.stop_callback = stop_callback
-        self.save_callback = save_callback # 保存回调
+        self.save_callback = save_callback  # 保存回调
         self.get_audio_input_devices_callback = get_audio_input_devices_callback
         self.get_available_models_callback = get_available_models_callback
 
@@ -30,16 +32,17 @@ class TranslatorUI(tk.Tk):
         self.input_device_names = []
         self.input_device_ids = {}
         self.selected_input_device = tk.StringVar(self)
-        self.input_device_dropdown = ttk.Combobox(control_frame, textvariable=self.selected_input_device, state="readonly", width=30)
+        self.input_device_dropdown = ttk.Combobox(control_frame, textvariable=self.selected_input_device,
+                                                  state="readonly", width=30)
         self.input_device_dropdown.pack(side=tk.LEFT, padx=5)
         self.input_device_dropdown.bind("<<ComboboxSelected>>", self._on_input_device_selected)
 
         # 系统音频输入提示
         system_audio_hint_frame = tk.Frame(self, padx=10, pady=0)
         system_audio_hint_frame.pack(side=tk.TOP, fill=tk.X, anchor=tk.W)
-        tk.Label(system_audio_hint_frame, text="提示：要翻译扬声器输出，请在“音频输入设备”中选择“立体声混音”或类似的设备（如果可用）。",
+        tk.Label(system_audio_hint_frame,
+                 text="提示：要翻译扬声器输出，请在“音频输入设备”中选择“立体声混音”或类似的设备（如果可用）。",
                  font=("Helvetica", 9), fg="gray").pack(side=tk.LEFT, padx=5, pady=(0, 5))
-
 
         # --- 模型选择区域 ---
         model_frame = tk.Frame(self, padx=10, pady=5)
@@ -49,7 +52,8 @@ class TranslatorUI(tk.Tk):
         tk.Label(model_frame, text="识别模型:", font=("Helvetica", 10)).pack(side=tk.LEFT, padx=5)
         self.stt_model_names = []
         self.selected_stt_model = tk.StringVar(self)
-        self.stt_model_dropdown = ttk.Combobox(model_frame, textvariable=self.selected_stt_model, state="readonly", width=20)
+        self.stt_model_dropdown = ttk.Combobox(model_frame, textvariable=self.selected_stt_model, state="readonly",
+                                               width=20)
         self.stt_model_dropdown.pack(side=tk.LEFT, padx=5)
         self.stt_model_dropdown.bind("<<ComboboxSelected>>", self._on_stt_model_selected)
 
@@ -57,7 +61,8 @@ class TranslatorUI(tk.Tk):
         tk.Label(model_frame, text="翻译模型:", font=("Helvetica", 10)).pack(side=tk.LEFT, padx=10)
         self.mt_model_names = []
         self.selected_mt_model = tk.StringVar(self)
-        self.mt_model_dropdown = ttk.Combobox(model_frame, textvariable=self.selected_mt_model, state="readonly", width=25)
+        self.mt_model_dropdown = ttk.Combobox(model_frame, textvariable=self.selected_mt_model, state="readonly",
+                                              width=25)
         self.mt_model_dropdown.pack(side=tk.LEFT, padx=5)
         self.mt_model_dropdown.bind("<<ComboboxSelected>>", self._on_mt_model_selected)
 
@@ -76,10 +81,10 @@ class TranslatorUI(tk.Tk):
                                      font=("Helvetica", 12), bg="salmon", width=10, state=tk.DISABLED)
         self.stop_button.pack(side=tk.LEFT, padx=5)
 
-        self.save_button = tk.Button(button_status_frame, text="保存翻译", command=self.save_translation_to_file, # 新增保存按钮
+        self.save_button = tk.Button(button_status_frame, text="保存翻译", command=self.save_translation_to_file,
+                                     # 新增保存按钮
                                      font=("Helvetica", 12), bg="lightblue", width=10, state=tk.DISABLED)
-        self.save_button.pack(side=tk.LEFT, padx=15) # 稍微增加间距
-
+        self.save_button.pack(side=tk.LEFT, padx=15)  # 稍微增加间距
 
         # --- 文本显示区域 ---
         text_frame = tk.Frame(self, padx=10, pady=10)
@@ -89,7 +94,7 @@ class TranslatorUI(tk.Tk):
         recognized_label = tk.Label(text_frame, text="识别文本:", font=("Helvetica", 12, "bold"))
         recognized_label.pack(side=tk.TOP, anchor=tk.W, pady=(0, 5))
         self.recognized_text = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD, height=10,
-                                                         font=("Helvetica", 14), bg="white", fg="black")
+                                                         font=("Helvetica", 14), bg="white", fg="black")  # 修改背景和前景颜色
         self.recognized_text.pack(side=tk.TOP, fill=tk.BOTH, expand=True, pady=(0, 10))
         self.recognized_text.config(state=tk.DISABLED)
 
@@ -97,7 +102,7 @@ class TranslatorUI(tk.Tk):
         translated_label = tk.Label(text_frame, text="翻译结果:", font=("Helvetica", 12, "bold"))
         translated_label.pack(side=tk.TOP, anchor=tk.W, pady=(0, 5))
         self.translated_text = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD, height=10,
-                                                          font=("Helvetica", 14), bg="white", fg="black")
+                                                         font=("Helvetica", 14), bg="white", fg="black")  # 修改背景和前景颜色
         self.translated_text.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.translated_text.config(state=tk.DISABLED)
 
@@ -139,7 +144,6 @@ class TranslatorUI(tk.Tk):
             else:
                 self.selected_mt_model.set(self.mt_model_names[0])
 
-
     def _on_input_device_selected(self, event):
         print(f"选择了音频输入设备: {self.selected_input_device.get()}")
 
@@ -174,7 +178,7 @@ class TranslatorUI(tk.Tk):
             self.status_label.config(text="状态: 监听中...", fg="blue")
             self.start_button.config(state=tk.DISABLED)
             self.stop_button.config(state=tk.NORMAL)
-            self.save_button.config(state=tk.NORMAL) # 启动后启用保存按钮
+            self.save_button.config(state=tk.NORMAL)  # 启动后启用保存按钮
             self.input_device_dropdown.config(state=tk.DISABLED)
             self.stt_model_dropdown.config(state=tk.DISABLED)
             self.mt_model_dropdown.config(state=tk.DISABLED)
@@ -192,7 +196,7 @@ class TranslatorUI(tk.Tk):
         self.status_label.config(text="状态: 已停止", fg="red")
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
-        self.save_button.config(state=tk.DISABLED) # 停止后禁用保存按钮
+        self.save_button.config(state=tk.DISABLED)  # 停止后禁用保存按钮
         self.input_device_dropdown.config(state="readonly")
         self.stt_model_dropdown.config(state="readonly")
         self.mt_model_dropdown.config(state="readonly")
@@ -217,31 +221,29 @@ class TranslatorUI(tk.Tk):
             except Exception as e:
                 messagebox.showerror("保存错误", f"保存文件失败：\n{e}")
 
-    def append_recognized_text(self, text):
+    def append_recognized_text(self, text, final=False):  # 修改：增加 final 参数
         self.recognized_text.config(state=tk.NORMAL)
+
         # 获取当前文本框的所有内容
         current_content = self.recognized_text.get("1.0", tk.END).strip()
-        if not current_content or current_content.endswith("\n"):
-            if text.startswith(" (Partial) "):
-                # 如果是新的 partial 结果，直接追加，不加换行
-                self.recognized_text.insert(tk.END, text)
-            else:
-                # 如果是新的 final 结果，直接追加，加换行
-                self.recognized_text.insert(tk.END, text + "\n")
+
+        # 找到当前最后一行的起始索引
+        last_line_start_index = self.recognized_text.index("end-1c linestart")
+        # 获取当前最后一行的内容
+        last_line_content = self.recognized_text.get(last_line_start_index, tk.END).strip()
+
+        if final:
+            # 如果是最终结果，删除当前最后一行（可能是部分结果），然后插入最终结果并换行
+            if last_line_content:  # 只有当有内容时才删除
+                self.recognized_text.delete(last_line_start_index, tk.END)
+            self.recognized_text.insert(tk.END, text + "\n")
         else:
-            last_line_start = self.recognized_text.index("end-1c linestart")
-            last_line_content = self.recognized_text.get(last_line_start, tk.END).strip()
+            # 如果是部分结果
+            if last_line_content:  # 如果当前有内容，就删除最后一行（覆盖）
+                self.recognized_text.delete(last_line_start_index, tk.END)
+            self.recognized_text.insert(tk.END, text)  # 插入新的部分结果，不加换行
 
-            if text.startswith(" (Partial) "):
-                if last_line_content.startswith("(Partial)"):
-                    self.recognized_text.delete(last_line_start, tk.END)
-                self.recognized_text.insert(tk.END, text)
-            else:
-                if last_line_content.startswith("(Partial)"):
-                    self.recognized_text.delete(last_line_start, tk.END)
-                self.recognized_text.insert(tk.END, text + "\n")
-
-        self.recognized_text.see(tk.END)
+        self.recognized_text.see(tk.END)  # 滚动到最新文本
         self.recognized_text.config(state=tk.DISABLED)
 
     def append_translated_text(self, text):

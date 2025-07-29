@@ -94,37 +94,27 @@ class RealtimeTranslatorApp:
             self.current_mt_model_name = mt_model_name
 
     def _audio_processing_loop(self):
-        """在单独的线程中运行的音频处理循环"""
+        """Audio processing loop running in a separate thread."""
         while self._running:
             audio_chunk = self.recorder.get_audio_chunk()
             if audio_chunk:
-                # 核心改动：只调用一次 AcceptWaveform，并根据其返回值处理结果
                 recognized_final = self.stt.recognizer.AcceptWaveform(audio_chunk)
 
                 if recognized_final:
-                    # 获取最终结果
                     result_json = json.loads(self.stt.recognizer.Result())
                     final_text = result_json.get("text", "").strip()
-                    # --- 调试信息：检查Vosk最终识别结果 ---
-                    # if final_text:
-                    #     print(f"Vosk Final: '{final_text}'")
                     if final_text:
-                        self.ui.after(0, lambda: self.ui.append_recognized_text(final_text))  # 直接传递最终文本
+                        self.ui.after(0, lambda: self.ui.append_recognized_text(final_text, final=True))
                         if self.translator:
                             translated_text = self.translator.translate_text(final_text)
                             if translated_text:
                                 self.ui.after(0, lambda: self.ui.append_translated_text(
                                     "原文：{}:\n翻译：{}".format(final_text, translated_text)))
                 else:
-                    # 获取部分结果
                     partial_result_json = json.loads(self.stt.recognizer.PartialResult())
                     partial_text = partial_result_json.get("partial", "").strip()
-                    # --- 调试信息：检查Vosk部分识别结果 ---
-                    # if partial_text:
-                    #     print(f"Vosk Partial: '{partial_text}'")
-                    if partial_text:  # 只有当有实际的partial文本时才更新UI
-                        # 为部分结果添加前缀，并传递给UI
-                        self.ui.after(0, lambda: self.ui.append_recognized_text(" (Partial) " + partial_text))
+                    if partial_text:
+                        self.ui.after(0, lambda: self.ui.append_recognized_text(partial_text, final=False))
             else:
                 time.sleep(0.01)
 

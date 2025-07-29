@@ -21,7 +21,7 @@
 
 ## 技术栈
 
-* **Python 3.x**
+* **Python 3.12以下**
 
 * **`sounddevice`**: 用于音频输入/输出。
 
@@ -57,6 +57,8 @@ https://alphacephei.com/vosk/models
 Hugging Face模型：    
 https://huggingface.co/Helsinki-NLP/opus-mt-zh-en   
 https://huggingface.co/Helsinki-NLP/opus-mt-en-zh
+
+## 这几个模型都较小，有时候识别效果不好，如果自己电脑的算力较好，可以换大的那个
 
 ### 3. 使用方法
 运行应用程序：
