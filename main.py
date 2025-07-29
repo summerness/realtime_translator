@@ -114,7 +114,7 @@ class RealtimeTranslatorApp:
                             translated_text = self.translator.translate_text(final_text)
                             if translated_text:
                                 self.ui.after(0, lambda: self.ui.append_translated_text(
-                                    "{}:\n{}".format(final_text, translated_text)))
+                                    "原文：{}:\n翻译：{}".format(final_text, translated_text)))
                 else:
                     # 获取部分结果
                     partial_result_json = json.loads(self.stt.recognizer.PartialResult())
