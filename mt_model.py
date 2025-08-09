@@ -1,48 +1,53 @@
 # mt_model.py
-import os # 导入 os 模块，用于路径检查
+import os
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 from config import HF_TRANSLATION_MODELS
+
+# 从我们自己的下载管理器导入函数
+from download_manager import download_hf_model_if_not_exists
+
 
 class MachineTranslator:
     def __init__(self, model_name: str):
         self.tokenizer = None
         self.model = None
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        if torch.cuda.is_available():
+            self.device = "cuda"
+        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            self.device = "mps"
+        else:
+            self.device = "cpu"
+
         self.load_model(model_name)
 
     def load_model(self, model_name: str):
-        """根据模型名称加载翻译模型"""
         model_info = HF_TRANSLATION_MODELS.get(model_name)
         if not model_info:
-            raise Exception(f"未知的翻译模型名称: {model_name}。请检查config.py中的HF_TRANSLATION_MODELS。")
+            raise Exception(f"Unknown translation model name: {model_name}.")
 
-        # 从 config 中获取本地模型路径
+        model_id = model_info["model_id"]
         model_path = model_info["model_path"]
 
-        # 检查本地模型路径是否存在
-        if not os.path.exists(model_path):
-            raise Exception(f"Hugging Face 模型路径不存在: {model_path} (模型: {model_name})。\n"
-                            "请手动下载模型文件并放置到此路径。\n"
-                            "您可以尝试先运行一次程序让其自动下载到缓存，然后将缓存中的模型文件复制过来。")
+        print(f"Initializing translation model: {model_name}")
 
-        print(f"正在加载翻译模型 ({model_name}): {model_path}...")
-        # 释放旧模型资源 (如果存在)
-        if self.tokenizer:
-            del self.tokenizer
-            self.tokenizer = None
-        if self.model:
-            del self.model
-            self.model = None
-            if self.device == "cuda":
-                torch.cuda.empty_cache() # 清理GPU缓存
+        if self.tokenizer: del self.tokenizer
+        if self.model: del self.model
+        if self.device == "cuda": torch.cuda.empty_cache()
 
-        # 从本地路径加载模型和分词器
+        # 1. 调用下载器确保翻译模型存在
+        print(f"Checking for translation model '{model_id}'...")
+        download_hf_model_if_not_exists(model_id, model_path)
+
+        print(f"Loading translation model from local path: '{model_path}'...")
+
+        # 2. 从本地路径加载
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
         self.model.to(self.device)
         self.model.eval()
-        print(f"翻译模型 ({model_name}) 加载完成，使用设备: {self.device}")
+        print(f"Translation model '{model_name}' loaded successfully.")
 
     def translate_text(self, text: str) -> str:
         if not text.strip() or not self.model:
@@ -55,13 +60,3 @@ class MachineTranslator:
 
         translated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return translated_text
-
-if __name__ == "__main__":
-    try:
-        translator_en_zh = MachineTranslator(model_name="英文->中文 (Helsinki-NLP)")
-        english_text = "Hello, how are you today?"
-        chinese_text = translator_en_zh.translate_text(english_text)
-        print(f"原文 (EN): {english_text}")
-        print(f"译文 (ZH): {chinese_text}")
-    except Exception as e:
-        print(f"翻译模型加载或使用失败: {e}")

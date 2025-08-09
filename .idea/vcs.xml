@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/models/opus-mt-en-zh" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/models/opus-mt-zh-en" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/models/whisper-medium.en" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/models/whisper-small.en" vcs="Git" />
   </component>
 </project>
